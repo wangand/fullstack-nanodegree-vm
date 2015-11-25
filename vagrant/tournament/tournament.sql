@@ -6,4 +6,51 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
+-- name: Andrew Wang
+-- Full Stack Web Developer Nanodegree
+-- Project 2 tournament results
 
+-- Create tournament database
+DROP DATABASE IF EXISTS tournament;
+CREATE DATABASE tournament;
+
+-- Create a table called players
+-- Has these properties:
+-- id - an auto incrementing integer which is the primary key
+-- name - a 255 char max varchar, cannot be null
+-- wins - the number of matches the player has won
+-- matches - the number of matches the player has played
+DROP TABLE IF EXISTS players CASCADE;
+CREATE TABLE players (
+	id SERIAL,
+	name VARCHAR(255) NOT NULL,
+	wins INT,
+	matches INT,
+	PRIMARY KEY (id)
+);
+
+-- Create a table called matches
+-- Has these Properties:
+-- id - an auto incrementing integer which is the primary key
+-- winner - int corresponding to id of winner
+-- loser - int corresponding to id of loser
+DROP TABLE IF EXISTS matches;
+CREATE TABLE matches(
+	id SERIAL,
+	winner INT,
+	Loser INT,
+	FOREIGN KEY(winner) REFERENCES players(id),
+	FOREIGN KEY(loser) REFERENCES players(id),
+	PRIMARY KEY (id)
+);
+
+-- Add test players and match
+INSERT INTO players(name, wins, matches) VALUES('Bob', 0, 0);
+INSERT INTO players(name, wins, matches) VALUES('George', 0, 0);
+INSERT INTO matches(winner, loser) VALUES(
+	(SELECT id FROM players WHERE name = 'Bob'),
+	(SELECT id FROM players WHERE name = 'George')
+);
+
+SELECT * FROM players;
+SELECT * FROM matches;
