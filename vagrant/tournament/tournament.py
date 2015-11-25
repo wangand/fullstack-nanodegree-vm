@@ -2,6 +2,9 @@
 # 
 # tournament.py -- implementation of a Swiss-system tournament
 #
+# name: Andrew Wang
+# Full Stack Web Developer Nanodegree
+# Project 2 tournament results
 
 import psycopg2
 
@@ -36,7 +39,6 @@ def countPlayers():
     cursor.execute("SELECT COUNT (id) FROM players")
     result = cursor.fetchone()
     DB.close()
-    print result
     return result[0]
 
 
@@ -49,6 +51,12 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
+    DB = connect()
+    cursor = DB.cursor()
+    cursor.execute("INSERT INTO players (name, wins, matches) "
+        "VALUES (%s, %s, %s)", (name,0,0))
+    DB.commit()
+    DB.close()
 
 
 def playerStandings():
@@ -64,6 +72,13 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    DB = connect()
+    cursor = DB.cursor()
+    cursor.execute("SELECT id, name, wins, matches "
+        "FROM players ORDER BY wins DESC")
+    results = cursor.fetchall()
+    DB.close()
+    return results
 
 
 def reportMatch(winner, loser):
@@ -73,6 +88,22 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+    DB = connect()
+    cursor = DB.cursor()
+    # Add match
+    cursor.execute("INSERT INTO matches (winner, loser) "
+        "VALUES (%s, %s)", (winner, loser))
+    # Update winner
+    cursor.execute("UPDATE players "
+        "SET wins = wins+1, matches = matches+1"
+        "WHERE id = %s", (winner,))
+    # Update loser
+    cursor.execute("UPDATE players "
+        "SET matches = matches+1"
+        "WHERE id = %s", (loser,))
+    # Commit all changes and close connection
+    DB. commit()
+    DB.close()
  
  
 def swissPairings():
@@ -90,5 +121,19 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-
+    # Get standings
+    standings = playerStandings()
+    retval = []
+    # Open connection
+    DB = connect()
+    cursor = DB.cursor()
+    # Add standings 2 by 2 in order to returned list
+    for i in range(0,len(standings),2):
+        tempId1 = standings[i][0]
+        tempName1 = standings[i][1]
+        tempId2 = standings[i+1][0]
+        tempName2 = standings[i+1][1]
+        retval.append((tempId1, tempName1, tempId2, tempName2))
+    DB.close()
+    return retval
 

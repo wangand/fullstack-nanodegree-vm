@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 #
 # Test cases for tournament.py
+#
+# name: Andrew Wang
+# Full Stack Web Developer Nanodegree
+# Project 2 tournament results
 
 from tournament import *
 
