@@ -10,9 +10,6 @@
 -- Full Stack Web Developer Nanodegree
 -- Project 2 tournament results
 
--- Create tournament database
-DROP DATABASE IF EXISTS tournament;
-CREATE DATABASE tournament;
 
 -- Create a table called players
 -- Has these properties:
@@ -43,14 +40,3 @@ CREATE TABLE matches(
 	FOREIGN KEY(loser) REFERENCES players(id),
 	PRIMARY KEY (id)
 );
-
--- Add test players and match
-INSERT INTO players(name, wins, matches) VALUES('Bob', 0, 0);
-INSERT INTO players(name, wins, matches) VALUES('George', 0, 0);
-INSERT INTO matches(winner, loser) VALUES(
-	(SELECT id FROM players WHERE name = 'Bob'),
-	(SELECT id FROM players WHERE name = 'George')
-);
-
-SELECT * FROM players;
-SELECT * FROM matches;
