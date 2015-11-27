@@ -3,6 +3,7 @@
 ## Installation
 
 Setting up the tournament database:
+
 1. Navigate to the tournament file in vagrant
 2. Create the tournament database in psql:
     ``` 
@@ -20,6 +21,7 @@ Setting up the tournament database:
 ## Usage
 
 Running the tests:
+
 1. Make sure you are in the tournament file in vagrant
 2. Use python to run tournament_test.py from the command line:
     ```
