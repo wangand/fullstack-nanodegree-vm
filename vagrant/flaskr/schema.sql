@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS entries;
+CREATE TABLE entries (
+	id SERIAL,
+	title TEXT NOT NULL,
+	text TEXT NOT NULL,
+	PRIMARY KEY (id)
+);

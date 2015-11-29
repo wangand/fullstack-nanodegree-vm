@@ -8,17 +8,7 @@ Setting up the tournament database:
 2. Create the tournament database in psql:
     
     ``` 
-    psql tournament
-    ```
-3. In the psql command line import tournament.sql:
-    
-    ```
-    \i tournament.sql
-    ```
-4. Exit psql:
-    
-    ```
-    \q
+    psql tournament -f tournament.sql
     ```
 
 ## Usage

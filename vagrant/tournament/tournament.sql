@@ -10,6 +10,9 @@
 -- Full Stack Web Developer Nanodegree
 -- Project 2 tournament results
 
+-- Create the tournament database
+DROP DATABASE IF EXISTS tournament;
+CREATE DATABASE tournament;
 
 -- Create a table called players
 -- Has these properties:
