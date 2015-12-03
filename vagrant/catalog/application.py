@@ -167,7 +167,8 @@ def HelloWorld():
     if 'username' not in login_session:
         return redirect('/login')
     user_list = show_users()
-    return render_template('catalog.html', title="cats", users=user_list)
+    temp_email = login_session['email']
+    return render_template('catalog.html', title="cats", users=user_list, email=temp_email)
 
 
 # Create JSON endpoint
@@ -239,8 +240,8 @@ def check_password(pword, hashed, salt):
 
 
 if __name__ == '__main__':
-    myHash, salt = hash_password("cat")
-    print check_password("cat", myHash, salt)
+    #myHash, salt = hash_password("cat")
+    #print check_password("cat", myHash, salt)
     app.secret_key = 'supersecretkey'
     app.debug = True
     app.run(host='0.0.0.0', port=8000)
