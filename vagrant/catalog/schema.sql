@@ -37,5 +37,46 @@ CREATE TABLE items(
 	PRIMARY KEY (id)
 );
 
+INSERT INTO users (user_name, hash, salt) VALUES (
+	'Cat',
+	'Meow',
+	'purr'
+);
+
+INSERT INTO users (user_name, hash, salt) VALUES (
+	'Dog',
+	'Woof',
+	'wag'
+);
+
+INSERT INTO items (creator, name, category) VALUES (
+	(SELECT id FROM users WHERE user_name='Cat'),
+	'chair',
+	'bed'
+);
+
+INSERT INTO items (creator, name, category) VALUES (
+	(SELECT id FROM users WHERE user_name='Cat'),
+	'box',
+	'bed'
+);
+
+INSERT INTO items (creator, name, category) VALUES (
+	(SELECT id FROM users WHERE user_name='Cat'),
+	'dog',
+	'pet'
+);
+
+INSERT INTO items (creator, name, category) VALUES (
+	(SELECT id FROM users WHERE user_name='Dog'),
+	'cat',
+	'pet'
+);
+
 SELECT * FROM users;
 SELECT * FROM items;
+
+SELECT * FROM items 
+WHERE creator=(
+	SELECT id FROM users WHERE user_name='Cat'
+);

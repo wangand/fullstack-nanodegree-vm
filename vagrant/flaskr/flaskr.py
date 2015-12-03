@@ -22,6 +22,7 @@ app.config.from_object(__name__)
 #    return "<h1>Hello World</h1>"
 
 
+
 # Function for connecting to psycopg2 database
 def connect():
    """
