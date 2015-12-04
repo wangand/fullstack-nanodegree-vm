@@ -18,6 +18,9 @@ import requests
 from flask import request
 import httplib2
 
+import database_setup
+from database_setup import User, Category, Item, session, get_categories, make_json
+
 app = Flask(__name__)
 
 
@@ -240,8 +243,18 @@ def check_password(pword, hashed, salt):
 
 
 if __name__ == '__main__':
-    #myHash, salt = hash_password("cat")
-    #print check_password("cat", myHash, salt)
+    for instance in session.query(Category):
+        print instance
+
+    for instance in session.query(User):
+        print instance
+
+    for instance in session.query(Item):
+        print instance
+
+    a,b = get_categories()
+    print a,b
+    make_json()
     app.secret_key = 'supersecretkey'
     app.debug = True
     app.run(host='0.0.0.0', port=8000)
