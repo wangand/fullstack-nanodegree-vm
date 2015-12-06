@@ -1,7 +1,10 @@
 <html>
 <title>{% block title %}Layout{% endblock %}</title>
 <body>
-Hello World stuff
+<ul>
+	<li><a href="{{ url_for('.gdisconnect') }}">Logout</a></li>
+	<li><a href="{{ url_for('.create_page') }}">Create</a></li>
+</ul>
 {% block content %}
 {% endblock %}
 </body>

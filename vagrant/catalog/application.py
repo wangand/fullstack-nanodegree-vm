@@ -4,7 +4,7 @@
 
 import json
 import psycopg2
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, url_for
 #from flask.ext.login import LoginManager
 import hashlib
 from os import urandom
@@ -165,13 +165,23 @@ def gdisconnect():
 
 # Create the index page
 @app.route('/')
-@app.route('/hello')
+@app.route('/catalog')
 def HelloWorld():
     if 'username' not in login_session:
         return redirect('/login')
+    ret = check_create_user()
     user_list = show_users()
     temp_email = login_session['email']
-    return render_template('catalog.html', title="cats", users=user_list, email=temp_email)
+    logout = url_for('.gdisconnect')
+    return render_template('catalog.html', title="Catalog", users=user_list, 
+        email=temp_email, logout_url=logout, userin=ret)
+
+
+@app.route('/create')
+def create_page(title="Create"):
+    if 'username' not in login_session:
+        return redirect('/login')
+    return render_template('create.html', title=title)
 
 
 # Create JSON endpoint
@@ -181,6 +191,45 @@ def endpoint():
     
 
 
+def no_email():
+    """
+    This function checks if email is in database
+    returns True if user email in database
+    returns False if not
+    """
+    query = session.query(User).filter(User.email == login_session['email'])
+    print query.count()
+    return query.count() == 0
+
+
+def insert_user():
+    """
+    This function inserts a user into database
+    """
+    temp_email = login_session['email']
+    temp_name = login_session['username']
+    temp_pic = login_session['picture']
+    temp_user = User(email=temp_email, name=temp_name, picture=temp_pic)
+    session.add(temp_user)
+    session.commit()
+
+
+def check_create_user():
+    """
+    this function checks if a new user needs to be created
+    first check if email in database
+    if not, make new user
+    """
+    print "check and creating user"
+    if no_email():
+        print "no email"
+        insert_user()
+    query = session.query(User)
+    print "about to return"
+    return query
+
+
+# UNNECESSARY FUNCTIONS ******************************************************
 # Function for connecting to psycopg2 database
 def connect():
     """
@@ -243,18 +292,20 @@ def check_password(pword, hashed, salt):
 
 
 if __name__ == '__main__':
-    for instance in session.query(Category):
-        print instance
+    #for instance in session.query(Category):
+    #    print instance
 
-    for instance in session.query(User):
-        print instance
+    #for instance in session.query(User):
+    #    print instance
 
-    for instance in session.query(Item):
-        print instance
+    #for instance in session.query(Item):
+    #    print instance
 
-    a,b = get_categories()
-    print a,b
-    make_json()
-    app.secret_key = 'supersecretkey'
+    #a,b = get_categories()
+    #print a,b
+    #make_json()
+
+    #no_email()
+    app.secret_key = 'supersecretkey' # for using session
     app.debug = True
     app.run(host='0.0.0.0', port=8000)

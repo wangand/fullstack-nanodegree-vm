@@ -8,4 +8,11 @@ HELLO
 <p>{{n.id}} {{n.user_name}}  {{n.hash_str}} {{n.salt}}</p>
 {% endfor %}
 {{email}}
+<br/>
+{% for n in userin %}
+{{n}}
+{% endfor %}
+<a href="{{logout_url}}">
+    logout
+</a>
 {% endblock %}
