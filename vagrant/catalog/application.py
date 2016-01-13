@@ -197,6 +197,9 @@ def create_page(title="Create"):
         return redirect('/login')
     return render_template('create.html', title=title)
 
+@app.route('/catalog/<catname>')
+def make_category(catname):
+    return catname
 
 # Create JSON endpoint
 @app.route('/catalog.json')
