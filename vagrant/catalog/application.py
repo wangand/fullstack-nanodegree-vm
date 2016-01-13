@@ -171,8 +171,10 @@ def HelloWorld():
         #return "Hello World"
         #return redirect('/login')
         item_list = show_items()
+        cat_list = show_categories()
         return render_template('catalog.html', title="Catalog",
-            item_list=item_list, logged=url_for('.login'), logact="Login")
+            item_list=item_list, logged=url_for('.login'), logact="Login",
+            cat_list=cat_list)
     else:
         #ret = check_create_user()
         #user_list = show_users()
@@ -182,9 +184,11 @@ def HelloWorld():
         #    users=user_list, email=temp_email, logout_url=logout,
         #    userin=ret, logged=url_for('.gdisconnect'), logact="Logout")
         item_list = show_items()
+        cat_list = show_categories()
         print item_list
         return render_template('catalog.html', title="Catalog",
-            item_list=item_list, logged=url_for('.gdisconnect'), logact="Logout")
+            item_list=item_list, logged=url_for('.gdisconnect'), logact="Logout",
+            create=url_for('.create_page'), cat_list=cat_list)
 
 
 @app.route('/create')
@@ -198,13 +202,28 @@ def create_page(title="Create"):
 @app.route('/catalog.json')
 def endpoint():
     return "JSON"
+
+def show_categories():
+    """
+    This function shows all categories
+    returns a list of categories
+    """
+    query = session.query(Category)
+    ret = [x.category_name for x in query]
+    return ret
     
 def show_items():
     """
     This function shows all items
+    returns a list of (item,category) tuples
     """
     query = session.query(Item)
-    ret = [x.item_name for x in query]
+    ret = []
+    for x in query:
+        t_name = x.item_name
+        t_cat = session.query(Category).filter(Category.id==x.category).one()
+        ret.append ((t_name, t_cat.category_name))
+    #ret = [(x.item_name, x.category) for x in query]
     return ret
 
 

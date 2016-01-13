@@ -2,10 +2,28 @@
 {% block title %}
 {{title}}
 {% endblock %}
+
+
 {% block content %}
-HELLO
-<br/>
-{% for n in item_list %}
-{{ n }}
+<div id="categories">
+<h1>Categories</h1>
+<p>
+{% for i in cat_list %}
+{{i}}
 {% endfor %}
+</p>
+</div>
+
+
+<div id="items">
+{% if create %}
+<a href={{create}}>Add item</a>
+{% endif %}
+<h1>Items</h1>
+<p>
+{% for n in item_list %}
+{{ n[0] }} ({{ n[1] }})
+{% endfor %}
+</p>
+</div>
 {% endblock %}
