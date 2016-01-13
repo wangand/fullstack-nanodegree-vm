@@ -125,7 +125,7 @@ def gconnect():
 
 
 @app.route('/login')
-def showLogin():
+def login():
     state = ''.join(random.choice(string.ascii_uppercase + string.
         digits) for x in xrange(32))
     login_session['state'] = state
@@ -168,13 +168,23 @@ def gdisconnect():
 @app.route('/catalog')
 def HelloWorld():
     if 'username' not in login_session:
-        return redirect('/login')
-    ret = check_create_user()
-    user_list = show_users()
-    temp_email = login_session['email']
-    logout = url_for('.gdisconnect')
-    return render_template('catalog.html', title="Catalog", users=user_list, 
-        email=temp_email, logout_url=logout, userin=ret)
+        #return "Hello World"
+        #return redirect('/login')
+        item_list = show_items()
+        return render_template('catalog.html', title="Catalog",
+            item_list=item_list, logged=url_for('.login'), logact="Login")
+    else:
+        #ret = check_create_user()
+        #user_list = show_users()
+        #temp_email = login_session['email']
+        #logout = url_for('.gdisconnect')
+        #return render_template('catalog.html', title="Catalog", 
+        #    users=user_list, email=temp_email, logout_url=logout,
+        #    userin=ret, logged=url_for('.gdisconnect'), logact="Logout")
+        item_list = show_items()
+        print item_list
+        return render_template('catalog.html', title="Catalog",
+            item_list=item_list, logged=url_for('.gdisconnect'), logact="Logout")
 
 
 @app.route('/create')
@@ -189,6 +199,13 @@ def create_page(title="Create"):
 def endpoint():
     return "JSON"
     
+def show_items():
+    """
+    This function shows all items
+    """
+    query = session.query(Item)
+    ret = [x.item_name for x in query]
+    return ret
 
 
 def no_email():
@@ -231,64 +248,65 @@ def check_create_user():
 
 # UNNECESSARY FUNCTIONS ******************************************************
 # Function for connecting to psycopg2 database
-def connect():
-    """
-    Returns a tuple containing database connection and a cursor
-    connection is the database connection
-    cursor is the cursor
-    retruned value: (connection, cursor)
-    """
-    temp_connect = psycopg2.connect("dbname=catalog")
-    temp_cursor = temp_connect.cursor()
-    return (temp_connect, temp_cursor)
+#def connect():
+#    """
+#    Returns a tuple containing database connection and a cursor
+#    connection is the database connection
+#    cursor is the cursor
+#    retruned value: (connection, cursor)
+#    """
+#    temp_connect = psycopg2.connect("dbname=catalog")
+#    temp_cursor = temp_connect.cursor()
+#    return (temp_connect, temp_cursor)
 
 
 # Function for accessing entries
-def show_users():
-    """
-    This function returns a list of a dictionary entries
-    """
-    db, cursor = connect()
-    cursor.execute('SELECT id, user_name, hash, salt FROM '
-                   'users ORDER BY id DESC')
-    entries = [dict(id=row[0], user_name=row[1],
-              hash_str=row[2], salt=row[3])
-              for row in cursor.fetchall()]
-    db.close()
-    return entries
+#def show_users():
+#    """
+#    This function returns a list of a dictionary entries
+#    """
+#    db, cursor = connect()
+#    cursor.execute('SELECT id, user_name, hash, salt FROM '
+#                   'users ORDER BY id DESC')
+#    entries = [dict(id=row[0], user_name=row[1],
+#              hash_str=row[2], salt=row[3])
+#              for row in cursor.fetchall()]
+#    db.close()
+#    return entries
 
 
 # Accesses exactly one thing
-def show_items():
-    """
-    This function shows only those items that
-    where created by the user
-    """
-    db, cursor = connect()
-    cursor.execute()
-    entries = [('SELECT * FROM users')
-              for row in cursor.fetchall()]
-    db.close()
-    print entries
-    return entries
+#def show_items():
+#    """
+#    This function shows only those items that
+#    where created by the user
+#    """
+#    db, cursor = connect()
+#    cursor.execute()
+#    entries = [('SELECT * FROM users')
+#              for row in cursor.fetchall()]
+#    db.close()
+#    print entries
+#    return entries
 
 
 # hashes a password
 # returns a tuple containing the hash and salt
-def hash_password(pword):
-    salt = b64encode(urandom(8))
-    salted_hash = salt + b64encode(pword)
-    m = hashlib.sha256()
-    m.update(salted_hash)
-    return (m.hexdigest(), salt)
+#def hash_password(pword):
+#    salt = b64encode(urandom(8))
+#    salted_hash = salt + b64encode(pword)
+#    m = hashlib.sha256()
+#    m.update(salted_hash)
+#    return (m.hexdigest(), salt)
 
 
-def check_password(pword, hashed, salt):
-    temp_pword = salt + b64encode(pword)
-    m = hashlib.sha256()
-    m.update(temp_pword)
-    new_hash = m.hexdigest()
-    return new_hash == hashed
+#def check_password(pword, hashed, salt):
+#    temp_pword = salt + b64encode(pword)
+#    m = hashlib.sha256()
+#    m.update(temp_pword)
+#    new_hash = m.hexdigest()
+#    return new_hash == hashed
+# End unnecessary functions *********************************************
 
 
 if __name__ == '__main__':
@@ -304,6 +322,12 @@ if __name__ == '__main__':
     #a,b = get_categories()
     #print a,b
     #make_json()
+
+    #with app.test_request_context():
+    #    print url_for('.create_page')
+
+    #for n in show_items():
+    #    print n
 
     #no_email()
     app.secret_key = 'supersecretkey' # for using session

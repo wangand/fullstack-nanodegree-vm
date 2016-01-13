@@ -16,12 +16,13 @@
 
 <body>  
 
+<div id="logincenter" align="center">
 
-<!-- GOOGLE PLUS SIGN IN-->
+    <h2>Welcome User! Please sign in to access the catalog.</h2>
 
-          
-          <div id="signInButton">
-          <span class="g-signin"
+    <!-- GOOGLE PLUS SIGN IN-->   
+    <div id="signInButton" align="center">
+        <span class="g-signin"
             data-scope="openid email"
             data-clientid="702409932727-ppr1t4kbdt621pc0rrc74m1f69gofaji.apps.googleusercontent.com"
             data-redirecturi="postmessage"
@@ -29,10 +30,12 @@
             data-cookiepolicy="single_host_origin"
             data-callback="signInCallback"
             data-approvalprompt="force">
-          </span>
-        </div>
+        </span>
+    </div>
 
-<div id="result"></div>
+    <div id="result"></div>
+
+</div>
 
 <script>
 function signInCallback(authResult) {
