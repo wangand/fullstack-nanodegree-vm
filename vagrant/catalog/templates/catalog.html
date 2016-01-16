@@ -9,7 +9,9 @@
 <h1>Categories</h1>
 <p>
 {% for i in cat_list %}
-{{i}}
+<a href={{ url_for('.make_category', catname=i) }}>
+{{ i }}
+</a>
 {% endfor %}
 </p>
 </div>
@@ -22,7 +24,9 @@
 <h1>Items</h1>
 <p>
 {% for n in item_list %}
+<a href={{ url_for('.make_item', catname=n[1], itemname=n[0]) }}>
 {{ n[0] }} ({{ n[1] }})
+</a>
 {% endfor %}
 </p>
 </div>

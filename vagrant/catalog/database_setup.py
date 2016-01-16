@@ -1,12 +1,31 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+import datetime
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
-import json 
+import json
+import sqlite3
+
+
+"""
+Drop tables to refresh schema
+"""
+conn = sqlite3.connect('catalog.db')
+c = conn.cursor()
+c.execute('drop table if exists items')
+c.execute('drop table if exists users')
+c.execute('drop table if exists categories')
+conn.commit()
+conn.close()
+"""
+End schema refresh
+"""
+
 
 Base = declarative_base()
+
 
 class User(Base):
     __tablename__ = 'users'
@@ -15,6 +34,8 @@ class User(Base):
     email = Column(String(255), nullable = False)
     name = Column(String(255), nullable = False)
     picture = Column(String)
+
+    item = relationship("Item")
 
     def __repr__(self):
       return "<User(name='%s', email='%s', id='%s')>" % (
@@ -27,6 +48,8 @@ class Category(Base):
     id = Column(Integer, primary_key = True)
     category_name = Column(String(255), nullable = False)
 
+    item = relationship("Item")
+
     def __repr__(self):
       return "<Category(name='%s', id='%s')>" % (
                                 self.category_name, self.id)
@@ -38,12 +61,13 @@ class Item(Base):
     id = Column(Integer, primary_key = True)
     item_name = Column(String(255), nullable = False)
     description = Column(String, nullable = False)
-    category = Column(Integer, ForeignKey('categories.id'), nullable = False)
+    cat_id = Column(Integer, ForeignKey('categories.id'), nullable = False)
     creator = Column(Integer, ForeignKey('users.id'), nullable = False)
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)
 
     def __repr__(self):
       return "<Item(name='%s', id='%s', description='%s', category='%s', creator='%s')>" % (
-                                self.item_name, self.id, self.description, self.category, self.creator)
+                                self.item_name, self.id, self.description, self.cat_id, self.creator)
 
 
 # Setup and bind sqlite3 engine
@@ -68,6 +92,7 @@ session.add_all([
     cat_brush,
     cat_mats,
     cat_pen])
+
 
 # Add users
 user_me = User(email = "sekretemail@gmail.com", name = "Andrew")
@@ -132,9 +157,9 @@ brush_id = return_one_category("Brushes")
 #brush_id = session.query(Category).filter(Category.category_name=="Brushes").one().id
 pen_id = return_one_category("Pens")
 
-itm_paintbrush = Item(item_name = "paintbrush", description = "for paint", category = brush_id, creator=my_id)
-itm_dippen = Item(item_name = "dippen", description = "for oil", category = pen_id, creator=my_id)
-itm_oilbrush = Item(item_name = "oilbrush", description = "for oil", category = brush_id, creator=my_id)
+itm_paintbrush = Item(item_name = "paintbrush", description = "for paint", cat_id = brush_id, creator=my_id)
+itm_dippen = Item(item_name = "dippen", description = "for oil", cat_id = pen_id, creator=my_id)
+itm_oilbrush = Item(item_name = "oilbrush", description = "for oil", cat_id = brush_id, creator=my_id)
 
 session.add_all([
     itm_paintbrush,

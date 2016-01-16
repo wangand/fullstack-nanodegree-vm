@@ -197,14 +197,29 @@ def create_page(title="Create"):
         return redirect('/login')
     return render_template('create.html', title=title)
 
+
 @app.route('/catalog/<catname>')
 def make_category(catname):
-    return catname
+    query = session.query(Item).join(Category).filter(Category.category_name == catname) 
+    ret = [x.item_name for x in query]
+    return render_template('category.html', title=catname, catlist=ret)
+
+
+@app.route('/catalog/<catname>/<itemname>')
+def make_item(catname, itemname):
+    """
+    This function makes the page for items
+    Shows description of item
+    """
+    query = session.query(Item).filter(Item.item_name==itemname).one()
+    return render_template('item.html', title=itemname, item=itemname, desc=query.description)
+
 
 # Create JSON endpoint
 @app.route('/catalog.json')
 def endpoint():
     return "JSON"
+
 
 def show_categories():
     """
@@ -215,6 +230,7 @@ def show_categories():
     ret = [x.category_name for x in query]
     return ret
     
+
 def show_items():
     """
     This function shows all items
@@ -224,7 +240,7 @@ def show_items():
     ret = []
     for x in query:
         t_name = x.item_name
-        t_cat = session.query(Category).filter(Category.id==x.category).one()
+        t_cat = session.query(Category).filter(Category.id==x.cat_id).one()
         ret.append ((t_name, t_cat.category_name))
     #ret = [(x.item_name, x.category) for x in query]
     return ret

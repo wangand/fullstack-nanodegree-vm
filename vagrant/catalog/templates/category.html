@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}
+{{title}}
+{% endblock %}
+
+
+{% block content %}
+<p>
+{% for i in catlist%}
+{{i}}
+{% endfor %}
+</p>
+{% endblock %}
