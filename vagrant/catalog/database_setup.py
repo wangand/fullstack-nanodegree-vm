@@ -6,22 +6,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 import json
-import sqlite3
-
-
-"""
-Drop tables to refresh schema
-"""
-conn = sqlite3.connect('catalog.db')
-c = conn.cursor()
-c.execute('drop table if exists items')
-c.execute('drop table if exists users')
-c.execute('drop table if exists categories')
-conn.commit()
-conn.close()
-"""
-End schema refresh
-"""
 
 
 Base = declarative_base()

@@ -166,7 +166,7 @@ def gdisconnect():
 # Create the index page
 @app.route('/')
 @app.route('/catalog')
-def HelloWorld():
+def make_catalog():
     if 'username' not in login_session:
         #return "Hello World"
         #return redirect('/login')
@@ -200,9 +200,24 @@ def create_page(title="Create"):
 
 @app.route('/catalog/<catname>')
 def make_category(catname):
+    """
+    This function makes a category page
+    The category page shows every item in the category
+    """
+
+    # Check if logged in to change login/logout link
+    if 'username' not in login_session:
+        t_logact = "Login"
+        t_logged = url_for('.gdisconnect')
+    else:
+        t_logact = "Logout"
+        t_logged = url_for('.login')
+
+    # Get all items in category
     query = session.query(Item).join(Category).filter(Category.category_name == catname) 
     ret = [x.item_name for x in query]
-    return render_template('category.html', title=catname, catlist=ret)
+    return render_template('category.html', title=catname, catlist=ret,
+        logged=t_logged, logact=t_logact)
 
 
 @app.route('/catalog/<catname>/<itemname>')
@@ -210,15 +225,46 @@ def make_item(catname, itemname):
     """
     This function makes the page for items
     Shows description of item
+    If the user is logged in will check if user owns item
+    If user owns item, will have edit and delete buttons
     """
-    query = session.query(Item).filter(Item.item_name==itemname).one()
-    return render_template('item.html', title=itemname, item=itemname, desc=query.description)
+
+    # Check if logged in or not
+    if 'username' not in login_session:
+        t_logact = "Login"
+        t_logged = url_for('.login')
+        query = session.query(Item).filter(Item.item_name==itemname).one()
+        return render_template('item.html', title=itemname, item=itemname, 
+            desc=query.description, logged=t_logged, logact=t_logact)
+    else:
+        t_logact = "Logout"
+        t_logged = url_for('.gdisconnect')
+        if owns_item(itemname):
+            t_edit=True
+        else:
+            t_edit=False
+        query = session.query(Item).filter(Item.item_name==itemname).one()
+        return render_template('item.html', title=itemname, item=itemname, 
+            desc=query.description, logged=t_logged, logact=t_logact,
+            edit=t_edit)
 
 
 # Create JSON endpoint
 @app.route('/catalog.json')
 def endpoint():
     return "JSON"
+
+
+def owns_item(item):
+    """
+    This function checks if currently logged in user owns an item
+    returns True if is owner
+    returns False if not
+    """
+    query = session.query(Item).join(User).filter(User.email == login_session['email'])
+    query.filter(Item.item_name==item)
+    return query.count() != 0
+
 
 
 def show_categories():
