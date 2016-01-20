@@ -193,9 +193,30 @@ def make_catalog():
 
 @app.route('/create')
 def create_page(title="Create"):
+    """
+    This function allows the user to add an item
+    The user must be logged in first
+    """
+
+    # Check that user is logged in
     if 'username' not in login_session:
         return redirect('/login')
-    return render_template('create.html', title=title)
+
+    # Show the existing categories
+    categories = show_categories()
+    return render_template('create.html', title=title,
+        logged=url_for('.gdisconnect'), logact="Logout",
+        categories=categories)
+
+
+@app.route('/tryadd', methods=['POST'])
+def try_add():
+    """
+    This function receives data from the create item page from ajax call
+    Attempts add that item to database
+    """
+    return '<div class="success">FROM TRYADD</div>'
+
 
 
 @app.route('/catalog/<catname>')

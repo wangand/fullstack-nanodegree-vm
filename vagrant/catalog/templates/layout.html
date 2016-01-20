@@ -1,11 +1,13 @@
 <html>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <title>{% block title %}Layout{% endblock %}</title>
 <body>
+<div class="navbar">
 <ul>
 	<li><a href="{{ logged }}">{{ logact }}</a></li>
 	<li><a href="{{ url_for('.make_catalog') }}">Catalog Home</a></li>
-	<!--li><a href="{{ url_for('.create_page') }}">Create</a></li-->
 </ul>
+</div>
 {% block content %}
 {% endblock %}
 </body>
