@@ -20,6 +20,7 @@ import httplib2
 
 import database_setup
 from database_setup import User, Category, Item, session, get_categories, make_json
+from database_setup import return_one_category
 
 app = Flask(__name__)
 
@@ -176,7 +177,7 @@ def make_catalog():
             item_list=item_list, logged=url_for('.login'), logact="Login",
             cat_list=cat_list)
     else:
-        #ret = check_create_user()
+        check_create_user()
         #user_list = show_users()
         #temp_email = login_session['email']
         #logout = url_for('.gdisconnect')
@@ -215,7 +216,28 @@ def try_add():
     This function receives data from the create item page from ajax call
     Attempts add that item to database
     """
-    return '<div class="success">FROM TRYADD</div>'
+
+    # Check that user is logged in
+    if 'username' not in login_session:
+        return redirect('/login')
+
+    print request.form
+    print login_session['email']
+
+    # needed variables
+    t_cat = return_one_category(request.form["category"])
+    t_name = request.form["name"]
+    t_desc = request.form["desc"]
+
+    # get database needed info
+    t_user = session.query(User).filter(User.email==login_session['email']).one().id
+
+    t_itm = Item(item_name = t_name, description = t_desc, cat_id = t_cat, creator=t_user)
+    session.add(t_itm)
+    session.commit()
+
+    #print request.form
+    return request.form["category"]
 
 
 

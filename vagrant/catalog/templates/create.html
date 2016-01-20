@@ -40,7 +40,6 @@ function tryAdd() {
       url: "/tryadd",
       dataType: "html",
       data: $("#create_form").serialize(),
-      contentType: 'application/octet-stream; charset=utf-8',
       success: function(result) {
         $("#result").html(result);
       },
