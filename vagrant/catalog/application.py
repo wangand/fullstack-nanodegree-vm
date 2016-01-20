@@ -225,12 +225,21 @@ def try_add():
     print login_session['email']
 
     # needed variables
-    t_cat = return_one_category(request.form["category"])
     t_name = request.form["name"]
     t_desc = request.form["desc"]
 
-    # get database needed info
-    t_user = session.query(User).filter(User.email==login_session['email']).one().id
+    # get one and only one category
+    t_cat = return_one_category(request.form["category"])
+
+    # get one and only one user id
+    try:
+        t_user = session.query(User).filter(User.email==login_session['email']).one().id
+    except MultipleResultsFound:
+        return "Error More than one user found"
+    except NoResultFound:
+        return "Error No users with that email found"
+    except:
+        return "Error Unkown error"
 
     t_itm = Item(item_name = t_name, description = t_desc, cat_id = t_cat, creator=t_user)
     session.add(t_itm)
