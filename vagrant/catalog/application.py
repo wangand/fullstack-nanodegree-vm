@@ -20,7 +20,7 @@ import httplib2
 
 import database_setup
 from database_setup import User, Category, Item, session, get_categories, make_json
-from database_setup import return_one_category
+from database_setup import return_one_category, return_one_user
 
 app = Flask(__name__)
 
@@ -221,33 +221,35 @@ def try_add():
     if 'username' not in login_session:
         return redirect('/login')
 
-    print request.form
-    print login_session['email']
-
     # needed variables
     t_name = request.form["name"]
     t_desc = request.form["desc"]
 
-    # get one and only one category
+    # check if item exists already
+    # does not make sense to have more than 1 item with same name
+    if session.query(Item).filter(Item.item_name==t_name).count() != 0:
+        ret = "Sorry. "
+        ret += t_name
+        ret += " is already in the database"
+        return ret
+
+    # get one and only one category id
     t_cat = return_one_category(request.form["category"])
+    if t_cat == "ERROR":
+        return "Error getting category id"
 
     # get one and only one user id
-    try:
-        t_user = session.query(User).filter(User.email==login_session['email']).one().id
-    except MultipleResultsFound:
-        return "Error More than one user found"
-    except NoResultFound:
-        return "Error No users with that email found"
-    except:
-        return "Error Unkown error"
+    t_user = return_one_user(login_session['email'])
+    if t_user == "ERROR":
+        return "Error getting user id"
 
+    # add to database
     t_itm = Item(item_name = t_name, description = t_desc, cat_id = t_cat, creator=t_user)
     session.add(t_itm)
     session.commit()
 
-    #print request.form
+    # Return 
     return request.form["category"]
-
 
 
 @app.route('/catalog/<catname>')
@@ -285,7 +287,11 @@ def make_item(catname, itemname):
     if 'username' not in login_session:
         t_logact = "Login"
         t_logged = url_for('.login')
-        query = session.query(Item).filter(Item.item_name==itemname).one()
+        try:
+            query = session.query(Item).filter(Item.item_name==itemname).one()
+        except:
+            return render_template('notfound.html', title="denied",
+                logged=url_for('.login'), logact="Login")
         return render_template('item.html', title=itemname, item=itemname, 
             desc=query.description, logged=t_logged, logact=t_logact)
     else:
@@ -295,7 +301,11 @@ def make_item(catname, itemname):
             t_edit=True
         else:
             t_edit=False
-        query = session.query(Item).filter(Item.item_name==itemname).one()
+        try:
+            query = session.query(Item).filter(Item.item_name==itemname).one()
+        except:
+            return render_template('notfound.html', title="denied",
+                logged=url_for('.gdisconnect'), logact="Logout")
         return render_template('item.html', title=itemname, item=itemname, 
             desc=query.description, logged=t_logged, logact=t_logact,
             edit=t_edit)
@@ -307,6 +317,71 @@ def endpoint():
     return "JSON"
 
 
+@app.route('/<itemname>/edit')
+def edit_item(itemname):
+    """
+    This function edits an item
+    """
+
+    # redirect if not logged in
+    if 'username' not in login_session:
+        return redirect('/login')
+
+    # check if user owns the item
+    if not owns_item(itemname):
+        return render_template('denied.html', title="denied",
+            logged=url_for('.gdisconnect'), logact="Logout")
+
+    # generate form to edit item
+    return render_template('edit.html', title="edit", item=itemname, 
+            logged=url_for('.gdisconnect'), logact="Logout")
+
+
+@app.route('/<itemname>/delete')
+def delete_item(itemname):
+    """
+    This function deletes an item
+    """
+
+    # redirect if not logged in
+    if 'username' not in login_session:
+        return redirect('/login')
+
+    # check if user owns the item
+    if not owns_item(itemname):
+        return render_template('denied.html', title="denied",
+            logged=url_for('.gdisconnect'), logact="Logout")
+
+    # Ask to confirm delete item
+    return render_template('delete.html', title="delete", item=itemname, 
+            logged=url_for('.gdisconnect'), logact="Logout")
+
+
+@app.route('/trydelete', methods=['POST'])
+def try_delete():
+    """
+    Try to delete an item
+    Called from AJAX
+    """
+
+    itemname = request.form["itemname"]
+
+    # redirect if not logged in
+    if 'username' not in login_session:
+        return redirect('/login')
+
+    # check if user owns the item
+    if not owns_item(itemname):
+        return "Error you don't own that item"
+
+    # delete item
+    session.query(Item).filter(Item.item_name==itemname).delete()
+    session.commit()
+
+    return "Success"
+    
+
+
 def owns_item(item):
     """
     This function checks if currently logged in user owns an item
@@ -314,7 +389,8 @@ def owns_item(item):
     returns False if not
     """
     query = session.query(Item).join(User).filter(User.email == login_session['email'])
-    query.filter(Item.item_name==item)
+    query = query.filter(Item.item_name==item)
+    print query.count()
     return query.count() != 0
 
 
@@ -377,9 +453,9 @@ def check_create_user():
     if no_email():
         print "no email"
         insert_user()
-    query = session.query(User)
-    print "about to return"
-    return query
+    #query = session.query(User)
+    #print "about to return"
+    #return query
 
 
 # UNNECESSARY FUNCTIONS ******************************************************
