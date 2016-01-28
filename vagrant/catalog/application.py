@@ -2,26 +2,19 @@
 # Full Stack Web Developer Nanodegree
 # Project 3 Catalog
 
-import json
-import psycopg2
+import json, random, string, httplib2, requests
 from flask import Flask, render_template, redirect, flash, url_for
-#from flask.ext.login import LoginManager
-import hashlib
-from os import urandom
-from base64 import b64encode, b64decode
 from flask import session as login_session
-import random, string
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from flask import make_response
-import requests
 from flask import request
-import httplib2
 from flask import jsonify
 
 import database_setup
 from database_setup import User, Category, Item, session, get_categories, make_json
 from database_setup import return_one_category, return_one_user
+from sqlalchemy import desc
 
 app = Flask(__name__)
 
@@ -237,7 +230,15 @@ def try_add():
 
     # Check that user is logged in
     if 'username' not in login_session:
-        return redirect('/login')
+        ret = {'html': "Not logged in",
+            'status': "ERROR"}
+        return json.dumps(ret)
+
+    # Check that values were posted
+    if 'name' not in request.form or 'desc' not in request.form:
+        ret = {'html': "No values given",
+            'status': "ERROR"}
+        return json.dumps(ret)
 
     # needed variables
     t_name = request.form["name"]
@@ -246,20 +247,23 @@ def try_add():
     # check if item exists already
     # does not make sense to have more than 1 item with same name
     if session.query(Item).filter(Item.item_name==t_name).count() != 0:
-        ret = "Sorry. "
-        ret += t_name
-        ret += " is already in the database"
-        return ret
+        ret_str = "Sorry. "
+        ret_str += t_name
+        ret_str += " is already in the database"
+        ret = {'html': ret_str, 'status': "ERROR"}
+        return json.dumps(ret)
 
     # get one and only one category id
     t_cat = return_one_category(request.form["category"])
     if t_cat == "ERROR":
-        return "Error getting category id"
+        ret = {'html': "Error getting category id", 'status': "ERROR"}
+        return json.dumps(ret)
 
     # get one and only one user id
     t_user = return_one_user(login_session['email'])
     if t_user == "ERROR":
-        return "Error getting user id"
+        ret = {'html': "Error getting user id", 'status': "ERROR"}
+        return json.dumps(ret)
 
     # add to database
     t_itm = Item(item_name = t_name, description = t_desc, cat_id = t_cat, creator=t_user)
@@ -267,7 +271,8 @@ def try_add():
     session.commit()
 
     # Return 
-    return request.form["category"]
+    ret = {'html': "Item successfully added!", 'status': "SUCCESS"}
+    return json.dumps(ret)
 
 
 @app.route('/catalog/<catname>')
@@ -369,6 +374,20 @@ def try_edit():
     Called from AJAX
     """
 
+    # Check that user is logged in
+    if 'username' not in login_session:
+        ret = {'html': "Not logged in",
+            'status': "ERROR"}
+        return json.dumps(ret)
+
+    # make sure data was posted
+    if ('name' not in request.form or 'desc' not in request.form or
+            'original' not in request.form or 'category' not in request.form
+        ):
+        ret = {'html': "No values given",
+            'status': "ERROR"}
+        return json.dumps(ret)
+
     # get data
     original_name = request.form["original"]
     new_name = request.form["name"]
@@ -415,6 +434,10 @@ def try_delete():
     Called from AJAX
     """
 
+    # Make sure something was posted
+    if 'itemname' not in request.form:
+        ret = {'html': "ERROR. No item selecte for delete", 'status': "ERROR"}
+        return json.dumps(ret)
     itemname = request.form["itemname"]
 
     # redirect if not logged in
@@ -423,13 +446,15 @@ def try_delete():
 
     # check if user owns the item
     if not owns_item(itemname):
-        return "Error you don't own that item"
+        ret = {'html': "ERROR. You don't own that item", 'status': "ERROR"}
+        return json.dumps(ret)
 
     # delete item
     session.query(Item).filter(Item.item_name==itemname).delete()
     session.commit()
 
-    return "Success"
+    ret = {'html': "Item successfully deleted!", 'status': "SUCCESS"}
+    return json.dumps(ret)
     
 
 
@@ -461,7 +486,7 @@ def show_items():
     This function shows all items
     returns a list of (item,category) tuples
     """
-    query = session.query(Item)
+    query = session.query(Item).order_by(desc(Item.created_date))
     ret = []
     for x in query:
         t_name = x.item_name
@@ -504,95 +529,9 @@ def check_create_user():
     if no_email():
         print "no email"
         insert_user()
-    #query = session.query(User)
-    #print "about to return"
-    #return query
-
-
-# UNNECESSARY FUNCTIONS ******************************************************
-# Function for connecting to psycopg2 database
-#def connect():
-#    """
-#    Returns a tuple containing database connection and a cursor
-#    connection is the database connection
-#    cursor is the cursor
-#    retruned value: (connection, cursor)
-#    """
-#    temp_connect = psycopg2.connect("dbname=catalog")
-#    temp_cursor = temp_connect.cursor()
-#    return (temp_connect, temp_cursor)
-
-
-# Function for accessing entries
-#def show_users():
-#    """
-#    This function returns a list of a dictionary entries
-#    """
-#    db, cursor = connect()
-#    cursor.execute('SELECT id, user_name, hash, salt FROM '
-#                   'users ORDER BY id DESC')
-#    entries = [dict(id=row[0], user_name=row[1],
-#              hash_str=row[2], salt=row[3])
-#              for row in cursor.fetchall()]
-#    db.close()
-#    return entries
-
-
-# Accesses exactly one thing
-#def show_items():
-#    """
-#    This function shows only those items that
-#    where created by the user
-#    """
-#    db, cursor = connect()
-#    cursor.execute()
-#    entries = [('SELECT * FROM users')
-#              for row in cursor.fetchall()]
-#    db.close()
-#    print entries
-#    return entries
-
-
-# hashes a password
-# returns a tuple containing the hash and salt
-#def hash_password(pword):
-#    salt = b64encode(urandom(8))
-#    salted_hash = salt + b64encode(pword)
-#    m = hashlib.sha256()
-#    m.update(salted_hash)
-#    return (m.hexdigest(), salt)
-
-
-#def check_password(pword, hashed, salt):
-#    temp_pword = salt + b64encode(pword)
-#    m = hashlib.sha256()
-#    m.update(temp_pword)
-#    new_hash = m.hexdigest()
-#    return new_hash == hashed
-# End unnecessary functions *********************************************
 
 
 if __name__ == '__main__':
-    #for instance in session.query(Category):
-    #    print instance
-
-    #for instance in session.query(User):
-    #    print instance
-
-    #for instance in session.query(Item):
-    #    print instance
-
-    #a,b = get_categories()
-    #print a,b
-    #make_json()
-
-    #with app.test_request_context():
-    #    print url_for('.create_page')
-
-    #for n in show_items():
-    #    print n
-
-    #no_email()
     app.secret_key = 'supersecretkey' # for using session
     app.debug = True
     app.run(host='0.0.0.0', port=8000)

@@ -48,13 +48,17 @@ function tryAdd() {
     $.ajax({
       type: 'POST',
       url: "/tryadd",
-      dataType: "html",
+      dataType: "json",
       data: $("#create_form").serialize(),
       success: function(result) {
-        $("#result").html(result);
+        $("#result").html(result['html']);
+
+        if(result['status'] === "SUCCESS"){
+            window.location.href = "{{ url_for('.make_catalog') }}"
+        }
       },
       error: function(result) {
-        $("#result").html("ERROR");
+        $("#result").html("ERROR. Couldn't get data from server");
       },
       
   });

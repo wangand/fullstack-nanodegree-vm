@@ -17,6 +17,7 @@ Database and application are already set up in the /vagrant/catalog directory. T
 ## Usage
 
 Activate application.py and use a web browser to access localhost:8000
+
 1. Make sure you are in the /vagrant/catalog directory
 2. Run application.py with python
     ```

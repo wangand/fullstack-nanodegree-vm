@@ -25,10 +25,14 @@ function tryDelete() {
     $.ajax({
         type: 'POST',
         url: "/trydelete",
-        dataType: "html",
+        dataType: "json",
         data: "itemname={{ item }}",
         success: function(result) {
-            $("#result").html(result);
+            $("#result").html(result['html']);
+
+            if(result['status'] === "SUCCESS"){
+                window.location.href = "{{ url_for('.make_catalog') }}"
+            }
 
             // disable delete button
             $("#delete").click(function(){});
