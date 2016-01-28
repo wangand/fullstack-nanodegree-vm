@@ -3,10 +3,11 @@
 <title>{% block title %}Layout{% endblock %}</title>
 <body>
 <div class="navbar">
-<ul>
-	<li><a href="{{ logged }}">{{ logact }}</a></li>
-	<li><a href="{{ url_for('.make_catalog') }}">Catalog Home</a></li>
-	<li><a href="{{ url_for('.endpoint') }}">JSON endpoint</a></li>
+<ul class="navelement">
+    <li class="navbutton" id="specialbutton"><h1 class="storename">Art Shop</h1></li>
+    <li class="navbutton"><a href="{{ url_for('.make_catalog') }}">Catalog Home</a></li>
+	<li class="navbutton"><a href="{{ logged }}">{{ logact }}</a></li>
+	<li class="navbutton"><a href="{{ url_for('.endpoint') }}">JSON endpoint</a></li>
 </ul>
 </div>
 {% block content %}

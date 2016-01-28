@@ -1,3 +1,8 @@
+# name: Andrew Wang
+# Full Stack Web Developer Nanodegree
+# Project 3 Catalog
+
+
 import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, desc
 from sqlalchemy.ext.declarative import declarative_base

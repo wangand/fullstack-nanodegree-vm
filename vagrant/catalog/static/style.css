@@ -1,1 +1,38 @@
-.navbar {background: #5555FF;}
+.navbar {
+	background: #5555FF;
+}
+
+.navelement {
+	list-style-type: none;
+	margin:0;
+	padding: 10;
+}
+
+.navbutton {
+	display: inline;
+	background: #cc66ff;
+	color: #cc66ff;
+	padding: 10;
+	text-decoration: none;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	color: #666699;
+}
+
+.main {
+	text-align: center;
+}
+
+.storename{
+	display:inline;
+	color: #1f1f2e;
+}
+
+#specialbutton{
+	background: none;
+}

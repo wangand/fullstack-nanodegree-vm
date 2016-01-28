@@ -5,9 +5,10 @@
 
 
 {% block content %}
-<p>
-{% for i in catlist%}
-{{i}}
-{% endfor %}
-</p>
+<div class="main">
+    <h1>{{ title }}</h1>
+    {% for i in catlist%}
+    <a href={{url_for('make_item', catname=title, itemname=i)}}>{{i}}</a><br/>
+    {% endfor %}
+</div>
 {% endblock %}

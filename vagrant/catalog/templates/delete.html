@@ -7,12 +7,16 @@
 {% block content %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 
+<div class="main">
+
 Are you sure you want to delete {{ item }}?
 <div class="choice">
 <a id="delete" href="">Delete</a>
 <a href="{{ url_for('.make_catalog') }}">Cancel</a>
 </div>
 <div id="result">
+</div>
+
 </div>
 
 <script>

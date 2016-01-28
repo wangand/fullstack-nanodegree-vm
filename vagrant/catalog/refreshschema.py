@@ -1,3 +1,8 @@
+# name: Andrew Wang
+# Full Stack Web Developer Nanodegree
+# Project 3 Catalog
+
+
 import sqlite3
 import database_setup
 from database_setup import User, Category, Item, session, get_categories, make_json

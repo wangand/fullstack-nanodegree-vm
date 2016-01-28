@@ -2,6 +2,7 @@
 # Full Stack Web Developer Nanodegree
 # Project 3 Catalog
 
+
 import json, random, string, httplib2, requests
 from flask import Flask, render_template, redirect, flash, url_for
 from flask import session as login_session

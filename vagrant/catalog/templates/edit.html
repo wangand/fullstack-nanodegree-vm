@@ -7,29 +7,33 @@
 {% block content %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 
-<h1>edit {{ item }}</h1>
-<div class="editform">
-<form id="edit_form">
-Title:
-<input type="text" name="name" value="{{ name }}" id="name">
 
-Description:
-<input type="text" name="desc" value="{{ desc }}" id="desc">
+<div class="main">
+    <h1>edit {{ item }}</h1>
+    <div class="editform">
+    <form id="edit_form">
+    Title:
+    <input type="text" name="name" value="{{ name }}" id="name">
 
-Category:
-<select name="category" id="cat">
-{% for n in categories %}
-    <option value={{n}} {%if n == cur_cat%} selected="selected" {%endif%}>
-    {{n}}
-    </option>
-{% endfor %}
-</select>
-<input type="hidden" name="original" value="{{ name }}">
-<input type="submit">
-</form>
-</div>
+    Description:
+    <input type="text" name="desc" value="{{ desc }}" id="desc">
 
-<div id="result">
+    Category:
+    <select name="category" id="cat">
+    {% for n in categories %}
+        <option value={{n}} {%if n == cur_cat%} selected="selected" {%endif%}>
+        {{n}}
+        </option>
+    {% endfor %}
+    </select>
+    <input type="hidden" name="original" value="{{ name }}">
+    <input type="submit">
+    </form>
+    </div>
+
+    <div id="result">
+    </div>
+
 </div>
 
 <script>
