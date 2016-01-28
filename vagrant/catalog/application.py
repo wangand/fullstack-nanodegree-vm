@@ -3,7 +3,11 @@
 # Project 3 Catalog
 
 
-import json, random, string, httplib2, requests
+import json
+import random
+import string
+import httplib2
+import requests
 from flask import Flask, render_template, redirect, flash, url_for
 from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets
@@ -13,8 +17,8 @@ from flask import request
 from flask import jsonify
 
 import database_setup
-from database_setup import User, Category, Item, session, get_categories, make_json
-from database_setup import return_one_category, return_one_user
+from database_setup import User, Category, Item, session, get_categories
+from database_setup import return_one_category, return_one_user, make_json
 from sqlalchemy import desc
 
 app = Flask(__name__)
@@ -23,6 +27,7 @@ app = Flask(__name__)
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Item Catalog Application"
+
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -83,7 +88,8 @@ def gconnect():
     stored_credentials = login_session.get('credentials')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_credentials is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
+        t_str = 'Current user is already connected.'
+        response = make_response(json.dumps(t_str),
                                  200)
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -123,7 +129,7 @@ def gconnect():
 @app.route('/login')
 def login():
     state = ''.join(random.choice(string.ascii_uppercase + string.
-        digits) for x in xrange(32))
+                    digits) for x in xrange(32))
     login_session['state'] = state
     return render_template('login.html', STATE=login_session['state'])
 
@@ -132,41 +138,45 @@ def login():
 def gdisconnect():
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
-    print 'User name is: ' 
+    print 'User name is: '
     print login_session['username']
     if access_token is None:
         print 'Access Token is None'
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        t_str = 'Current user not connected.'
+        response = make_response(json.dumps(t_str), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    t_str = 'https://accounts.google.com/o/oauth2/revoke?token=%s'
+    url = t_str % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
     print result
     if result['status'] == '200':
-        del login_session['access_token'] 
+        del login_session['access_token']
         del login_session['gplus_id']
         del login_session['username']
         del login_session['email']
         del login_session['picture']
-        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        t_str = 'Successfully disconnected.'
+        response = make_response(json.dumps(t_str), 200)
         response.headers['Content-Type'] = 'application/json'
-        #return response
         return render_template('logout.html', title="Logout",
-            msg='SUCCESS', logged=url_for('.login'), logact="Login")
+                               msg='SUCCESS', logged=url_for('.login'),
+                               logact="Login")
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        t_str = 'Failed to revoke token for given user.'
+        response = make_response(json.dumps(t_str, 400))
         response.headers['Content-Type'] = 'application/json'
-        #return response
         return render_template('logout.html', title="Logout",
-            msg='Failed to revoke token for given user.', logged=url_for('.login'), logact="Login")
+                               msg='Failed to revoke token for given user.',
+                               logged=url_for('.login'), logact="Login")
 
 
 @app.route('/flgout', methods=['POST'])
 def force_logout():
     if request.form["msg"] == "fromlogout":
-        del login_session['access_token'] 
+        del login_session['access_token']
         del login_session['gplus_id']
         del login_session['username']
         del login_session['email']
@@ -181,27 +191,22 @@ def force_logout():
 @app.route('/catalog')
 def make_catalog():
     if 'username' not in login_session:
-        #return "Hello World"
-        #return redirect('/login')
         item_list = show_items()
         cat_list = show_categories()
         return render_template('catalog.html', title="Catalog",
-            item_list=item_list, logged=url_for('.login'), logact="Login",
-            cat_list=cat_list)
+                               item_list=item_list, logged=url_for('.login'),
+                               logact="Login", cat_list=cat_list)
     else:
         check_create_user()
-        #user_list = show_users()
-        #temp_email = login_session['email']
-        #logout = url_for('.gdisconnect')
-        #return render_template('catalog.html', title="Catalog", 
-        #    users=user_list, email=temp_email, logout_url=logout,
-        #    userin=ret, logged=url_for('.gdisconnect'), logact="Logout")
         item_list = show_items()
         cat_list = show_categories()
-        print item_list
+        print "creating"
         return render_template('catalog.html', title="Catalog",
-            item_list=item_list, logged=url_for('.gdisconnect'), logact="Logout",
-            create=url_for('.create_page'), cat_list=cat_list)
+                               item_list=item_list,
+                               logged=url_for('.gdisconnect'),
+                               logact="Logout",
+                               create=url_for('.create_page'),
+                               cat_list=cat_list)
 
 
 @app.route('/create')
@@ -218,8 +223,8 @@ def create_page(title="Create"):
     # Show the existing categories
     categories = show_categories()
     return render_template('create.html', title=title,
-        logged=url_for('.gdisconnect'), logact="Logout",
-        categories=categories)
+                           logged=url_for('.gdisconnect'), logact="Logout",
+                           categories=categories)
 
 
 @app.route('/tryadd', methods=['POST'])
@@ -232,13 +237,13 @@ def try_add():
     # Check that user is logged in
     if 'username' not in login_session:
         ret = {'html': "Not logged in",
-            'status': "ERROR"}
+               'status': "ERROR"}
         return json.dumps(ret)
 
     # Check that values were posted
     if 'name' not in request.form or 'desc' not in request.form:
         ret = {'html': "No values given",
-            'status': "ERROR"}
+               'status': "ERROR"}
         return json.dumps(ret)
 
     # needed variables
@@ -247,7 +252,7 @@ def try_add():
 
     # check if item exists already
     # does not make sense to have more than 1 item with same name
-    if session.query(Item).filter(Item.item_name==t_name).count() != 0:
+    if session.query(Item).filter(Item.item_name == t_name).count() != 0:
         ret_str = "Sorry. "
         ret_str += t_name
         ret_str += " is already in the database"
@@ -267,11 +272,12 @@ def try_add():
         return json.dumps(ret)
 
     # add to database
-    t_itm = Item(item_name = t_name, description = t_desc, cat_id = t_cat, creator=t_user)
+    t_itm = Item(item_name=t_name, description=t_desc,
+                 cat_id=t_cat, creator=t_user)
     session.add(t_itm)
     session.commit()
 
-    # Return 
+    # Return
     ret = {'html': "Item successfully added!", 'status': "SUCCESS"}
     return json.dumps(ret)
 
@@ -292,10 +298,11 @@ def make_category(catname):
         t_logged = url_for('.login')
 
     # Get all items in category
-    query = session.query(Item).join(Category).filter(Category.category_name == catname) 
+    query = session.query(Item).join(Category)
+    query = query.filter(Category.category_name == catname)
     ret = [x.item_name for x in query]
     return render_template('category.html', title=catname, catlist=ret,
-        logged=t_logged, logact=t_logact)
+                           logged=t_logged, logact=t_logact)
 
 
 @app.route('/catalog/<catname>/<itemname>')
@@ -312,27 +319,31 @@ def make_item(catname, itemname):
         t_logact = "Login"
         t_logged = url_for('.login')
         try:
-            query = session.query(Item).filter(Item.item_name==itemname).one()
+            query = session.query(Item).filter(Item.item_name == itemname)
+            query = query.one()
         except:
             return render_template('notfound.html', title="denied",
-                logged=url_for('.login'), logact="Login")
-        return render_template('item.html', title=itemname, item=itemname, 
-            desc=query.description, logged=t_logged, logact=t_logact)
+                                   logged=url_for('.login'), logact="Login")
+        return render_template('item.html', title=itemname, item=itemname,
+                               desc=query.description, logged=t_logged,
+                               logact=t_logact)
     else:
         t_logact = "Logout"
         t_logged = url_for('.gdisconnect')
         if owns_item(itemname):
-            t_edit=True
+            t_edit = True
         else:
-            t_edit=False
+            t_edit = False
         try:
-            query = session.query(Item).filter(Item.item_name==itemname).one()
+            query = session.query(Item).filter(Item.item_name == itemname)
+            query = query.first()
         except:
             return render_template('notfound.html', title="denied",
-                logged=url_for('.gdisconnect'), logact="Logout")
-        return render_template('item.html', title=itemname, item=itemname, 
-            desc=query.description, logged=t_logged, logact=t_logact,
-            edit=t_edit)
+                                   logged=url_for('.gdisconnect'),
+                                   logact="Logout")
+        return render_template('item.html', title=itemname, item=itemname,
+                               desc=query.description, logged=t_logged,
+                               logact=t_logact, edit=t_edit)
 
 
 # Create JSON endpoint
@@ -354,18 +365,19 @@ def edit_item(itemname):
     # check if user owns the item
     if not owns_item(itemname):
         return render_template('denied.html', title="denied",
-            logged=url_for('.gdisconnect'), logact="Logout")
+                               logged=url_for('.gdisconnect'), logact="Logout")
 
     # generate form to edit item
     categories = show_categories()
     query = session.query(Item).filter(Item.item_name == itemname).first()
     t_desc = query.description
-    query2 = session.query(Category).join(Item).filter(Item.item_name==itemname).first()
-    t_cat = query2.category_name
-    return render_template('edit.html', title="edit", item=itemname, 
-            logged=url_for('.gdisconnect'), logact="Logout",
-            categories=categories, name=itemname, desc=t_desc,
-            cur_cat=t_cat)
+    query2 = session.query(Category).join(Item)
+    query2 = query2.filter(Item.item_name == itemname)
+    t_cat = query2.first().category_name
+    return render_template('edit.html', title="edit", item=itemname,
+                           logged=url_for('.gdisconnect'), logact="Logout",
+                           categories=categories, name=itemname, desc=t_desc,
+                           cur_cat=t_cat)
 
 
 @app.route('/tryedit', methods=['POST'])
@@ -378,15 +390,14 @@ def try_edit():
     # Check that user is logged in
     if 'username' not in login_session:
         ret = {'html': "Not logged in",
-            'status': "ERROR"}
+               'status': "ERROR"}
         return json.dumps(ret)
 
     # make sure data was posted
     if ('name' not in request.form or 'desc' not in request.form or
-            'original' not in request.form or 'category' not in request.form
-        ):
+            'original' not in request.form or 'category' not in request.form):
         ret = {'html': "No values given",
-            'status': "ERROR"}
+               'status': "ERROR"}
         return json.dumps(ret)
 
     # get data
@@ -396,7 +407,7 @@ def try_edit():
     new_cat = return_one_category(request.form["category"])
 
     # update data
-    item = session.query(Item).filter(Item.item_name==original_name).first()
+    item = session.query(Item).filter(Item.item_name == original_name).first()
     item.item_name = new_name
     item.description = new_desc
     item.cat_id = new_cat
@@ -404,9 +415,10 @@ def try_edit():
 
     # return to ajax call
     ret = {'status': "SUCCESS",
-        'html': "Successfully updated item"}
+           'html': "Successfully updated item"}
 
     return json.dumps(ret)
+
 
 @app.route('/<itemname>/delete')
 def delete_item(itemname):
@@ -421,11 +433,11 @@ def delete_item(itemname):
     # check if user owns the item
     if not owns_item(itemname):
         return render_template('denied.html', title="denied",
-            logged=url_for('.gdisconnect'), logact="Logout")
+                               logged=url_for('.gdisconnect'), logact="Logout")
 
     # Ask to confirm delete item
-    return render_template('delete.html', title="delete", item=itemname, 
-            logged=url_for('.gdisconnect'), logact="Logout")
+    return render_template('delete.html', title="delete", item=itemname,
+                           logged=url_for('.gdisconnect'), logact="Logout")
 
 
 @app.route('/trydelete', methods=['POST'])
@@ -451,12 +463,11 @@ def try_delete():
         return json.dumps(ret)
 
     # delete item
-    session.query(Item).filter(Item.item_name==itemname).delete()
+    session.query(Item).filter(Item.item_name == itemname).delete()
     session.commit()
 
     ret = {'html': "Item successfully deleted!", 'status': "SUCCESS"}
     return json.dumps(ret)
-    
 
 
 def owns_item(item):
@@ -465,11 +476,11 @@ def owns_item(item):
     returns True if is owner
     returns False if not
     """
-    query = session.query(Item).join(User).filter(User.email == login_session['email'])
-    query = query.filter(Item.item_name==item)
+    query = session.query(Item).join(User)
+    query = query.filter(User.email == login_session['email'])
+    query = query.filter(Item.item_name == item)
     print query.count()
     return query.count() != 0
-
 
 
 def show_categories():
@@ -480,7 +491,7 @@ def show_categories():
     query = session.query(Category)
     ret = [x.category_name for x in query]
     return ret
-    
+
 
 def show_items():
     """
@@ -491,9 +502,8 @@ def show_items():
     ret = []
     for x in query:
         t_name = x.item_name
-        t_cat = session.query(Category).filter(Category.id==x.cat_id).one()
-        ret.append ((t_name, t_cat.category_name))
-    #ret = [(x.item_name, x.category) for x in query]
+        t_cat = session.query(Category).filter(Category.id == x.cat_id).one()
+        ret.append((t_name, t_cat.category_name))
     return ret
 
 
@@ -533,6 +543,6 @@ def check_create_user():
 
 
 if __name__ == '__main__':
-    app.secret_key = 'supersecretkey' # for using session
+    app.secret_key = 'supersecretkey'  # for using sessioion
     app.debug = True
     app.run(host='0.0.0.0', port=8000)

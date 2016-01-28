@@ -36,3 +36,15 @@ h1 {
 #specialbutton{
 	background: none;
 }
+
+#createbutton{
+	text-decoration: underline;
+}
+
+.normallink{
+	color: #0000EE;
+}
+
+.normallink:visited{
+	color: #551A8B;
+}

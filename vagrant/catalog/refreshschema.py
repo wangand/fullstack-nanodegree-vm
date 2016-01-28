@@ -5,8 +5,6 @@
 
 import sqlite3
 import database_setup
-from database_setup import User, Category, Item, session, get_categories, make_json
-from database_setup import return_one_category
 
 
 """
@@ -23,5 +21,3 @@ c.execute('drop table if exists users')
 c.execute('drop table if exists categories')
 conn.commit()
 conn.close()
-
-

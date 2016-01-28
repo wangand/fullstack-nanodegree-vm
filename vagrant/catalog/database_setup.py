@@ -19,44 +19,46 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key = True)
-    email = Column(String(255), nullable = False)
-    name = Column(String(255), nullable = False)
+    id = Column(Integer, primary_key=True)
+    email = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False)
     picture = Column(String)
 
     item = relationship("Item")
 
     def __repr__(self):
-      return "<User(name='%s', email='%s', id='%s')>" % (
+        return "<User(name='%s', email='%s', id='%s')>" % (
                                 self.name, self.email, self.id)
 
 
 class Category(Base):
     __tablename__ = 'categories'
 
-    id = Column(Integer, primary_key = True)
-    category_name = Column(String(255), nullable = False)
+    id = Column(Integer, primary_key=True)
+    category_name = Column(String(255), nullable=False)
 
     item = relationship("Item")
 
     def __repr__(self):
-      return "<Category(name='%s', id='%s')>" % (
+        return "<Category(name='%s', id='%s')>" % (
                                 self.category_name, self.id)
 
 
 class Item(Base):
     __tablename__ = 'items'
 
-    id = Column(Integer, primary_key = True)
-    item_name = Column(String(255), nullable = False)
-    description = Column(String, nullable = False)
-    cat_id = Column(Integer, ForeignKey('categories.id'), nullable = False)
-    creator = Column(Integer, ForeignKey('users.id'), nullable = False)
+    id = Column(Integer, primary_key=True)
+    item_name = Column(String(255), nullable=False)
+    description = Column(String, nullable=False)
+    cat_id = Column(Integer, ForeignKey('categories.id'), nullable=False)
+    creator = Column(Integer, ForeignKey('users.id'), nullable=False)
     created_date = Column(DateTime, default=datetime.datetime.utcnow)
 
     def __repr__(self):
-      return "<Item(name='%s', id='%s', description='%s', category='%s', creator='%s')>" % (
-                                self.item_name, self.id, self.description, self.cat_id, self.creator)
+        ret_str = "<Item(name='%s', id='%s', description='%s'," \
+                  " category='%s', creator='%s')>"
+        return ret_str % (self.item_name, self.id,
+                          self.description, self.cat_id, self.creator)
 
 
 # Setup and bind sqlite3 engine
@@ -74,8 +76,9 @@ def return_one_category(name):
     The id will match the name given
     Returns "Error" if not able to return exactly 1 category id
     """
-    try: 
-        cat_id = session.query(Category).filter(Category.category_name==name).one().id
+    try:
+        cat_id = session.query(Category).filter(Category.category_name == name)
+        cat_id = cat_id.one().id
         return cat_id
     except MultipleResultsFound:
         return "ERROR"
@@ -92,7 +95,7 @@ def return_one_user(email):
     Returns "Error" if not able to return exactly 1 user id
     """
     try:
-        u_id = session.query(User).filter(User.email==email).one().id
+        u_id = session.query(User).filter(User.email == email).one().id
         return u_id
     except MultipleResultsFound:
         return "ERROR"
@@ -116,8 +119,8 @@ def get_categories():
 def make_json():
     items = session.query(Item)
     cats = session.query(Category)
-    #size, cats = get_categories()
-    the_list = [{'id':x.id, 'name':x.category_name, 'item':None} for x in cats]
+    the_list = [{'id': x.id, 'name': x.category_name, 'item': None}
+                for x in cats]
     for i in the_list:
         filtered = items.filter(Item.cat_id == i['id'])
         inner_list = []
