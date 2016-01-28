@@ -157,11 +157,28 @@ def gdisconnect():
         del login_session['picture']
         response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
-        return response
+        #return response
+        return render_template('logout.html', title="Logout",
+            msg='SUCCESS', logged=url_for('.login'), logact="Login")
     else:
         response = make_response(json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
-        return response
+        #return response
+        return render_template('logout.html', title="Logout",
+            msg='Failed to revoke token for given user.', logged=url_for('.login'), logact="Login")
+
+
+@app.route('/flgout', methods=['POST'])
+def force_logout():
+    if request.form["msg"] == "fromlogout":
+        del login_session['access_token'] 
+        del login_session['gplus_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        return "SUCCESS"
+    else:
+        return "ERROR"
 
 
 # Create the index page
@@ -333,9 +350,42 @@ def edit_item(itemname):
             logged=url_for('.gdisconnect'), logact="Logout")
 
     # generate form to edit item
+    categories = show_categories()
+    query = session.query(Item).filter(Item.item_name == itemname).first()
+    t_desc = query.description
+    query2 = session.query(Category).join(Item).filter(Item.item_name==itemname).first()
+    t_cat = query2.category_name
     return render_template('edit.html', title="edit", item=itemname, 
-            logged=url_for('.gdisconnect'), logact="Logout")
+            logged=url_for('.gdisconnect'), logact="Logout",
+            categories=categories, name=itemname, desc=t_desc,
+            cur_cat=t_cat)
 
+
+@app.route('/tryedit', methods=['POST'])
+def try_edit():
+    """
+    Try to edit an item
+    Called from AJAX
+    """
+
+    # get data
+    original_name = request.form["original"]
+    new_name = request.form["name"]
+    new_desc = request.form["desc"]
+    new_cat = return_one_category(request.form["category"])
+
+    # update data
+    item = session.query(Item).filter(Item.item_name==original_name).first()
+    item.item_name = new_name
+    item.description = new_desc
+    item.cat_id = new_cat
+    session.commit()
+
+    # return to ajax call
+    ret = {'status': "SUCCESS",
+        'html': "Successfully updated item"}
+
+    return json.dumps(ret)
 
 @app.route('/<itemname>/delete')
 def delete_item(itemname):

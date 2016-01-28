@@ -11,10 +11,10 @@
 <div class="createform">
 <form id="create_form">
 Title:
-<input type="text" name="name">
+<input type="text" name="name" id="name">
 
 Description:
-<input type="text" name="desc">
+<input type="text" name="desc" id="desc">
 
 Category:
 <select name="category">
@@ -31,8 +31,18 @@ Category:
 <script>
 $("#create_form").submit(function(event){
     event.preventDefault();
-    tryAdd();
+    validator();
 });
+
+function validator(){
+    if($("#name").val()=="" || $("#desc").val()==""){
+        console.log("error")
+        $("#result").html("Error. Please enter a name and a description")
+    }
+    else{
+      tryAdd();
+    }
+}
 
 function tryAdd() {
     $.ajax({

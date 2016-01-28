@@ -11,24 +11,65 @@
 <div class="editform">
 <form id="edit_form">
 Title:
-<input type="text" name="name">
+<input type="text" name="name" value="{{ name }}" id="name">
 
 Description:
-<input type="text" name="desc">
+<input type="text" name="desc" value="{{ desc }}" id="desc">
 
 Category:
-<select name="category">
+<select name="category" id="cat">
 {% for n in categories %}
-    <option value={{n}}>{{n}}</option>
+    <option value={{n}} {%if n == cur_cat%} selected="selected" {%endif%}>
+    {{n}}
+    </option>
 {% endfor %}
 </select>
+<input type="hidden" name="original" value="{{ name }}">
 <input type="submit">
 </form>
 </div>
 
+<div id="result">
+</div>
+
 <script>
+$("#edit_form").submit(function(event){
+    event.preventDefault();
+    validator();
+});
+
 function validator(){
-	
-}
+	if($("#name").val()=="" || $("#desc").val()==""){
+        console.log("error")
+        $("#result").html("Error. Please enter a name and a description")
+    }
+    else if($("#name").val()=="{{name}}" && $("#desc").val()=="{{desc}}" && $("#cat").val()=="{{cur_cat}}"){
+        $("#result").html("You didn't change anything.")
+    }
+    else{
+      tryEdit();
+    }
+};
+
+function tryEdit(){
+    $.ajax({
+      type: 'POST',
+      url: "/tryedit",
+      dataType: "json",
+      data: $("#edit_form").serialize(),
+      success: function(result) {
+        $("#result").html(result['html']);
+
+        if(result['status'] === "SUCCESS"){
+        	// redirect
+            window.location.href = "{{ url_for('.make_catalog') }}"
+        }
+      },
+      error: function(result) {
+        $("#result").html("ERROR");
+      },
+      
+  });
+};
 </script>
 {% endblock %}
