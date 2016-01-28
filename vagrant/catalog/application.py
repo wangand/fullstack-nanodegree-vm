@@ -17,6 +17,7 @@ from flask import make_response
 import requests
 from flask import request
 import httplib2
+from flask import jsonify
 
 import database_setup
 from database_setup import User, Category, Item, session, get_categories, make_json
@@ -331,7 +332,7 @@ def make_item(catname, itemname):
 # Create JSON endpoint
 @app.route('/catalog.json')
 def endpoint():
-    return "JSON"
+    return jsonify(make_json())
 
 
 @app.route('/<itemname>/edit')

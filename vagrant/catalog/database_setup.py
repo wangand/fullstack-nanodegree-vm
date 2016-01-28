@@ -114,15 +114,16 @@ def make_json():
     #size, cats = get_categories()
     the_list = [{'id':x.id, 'name':x.category_name, 'item':None} for x in cats]
     for i in the_list:
-        filtered = items.filter(Item.category == i['id'])
+        filtered = items.filter(Item.cat_id == i['id'])
         inner_list = []
         for k in filtered:
             inner_list.append({
                 'id': k.id,
-                'cat_id': k.category,
+                'cat_id': k.cat_id,
                 'description': k.description,
-                'name': k.item_name
+                'name': k.item_name,
+                'creator': k.creator
                 })
         i['item'] = inner_list
     printable = json.dumps({"Category": the_list})
-    print printable
+    return {"Category": the_list}
